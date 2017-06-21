@@ -1,3 +1,5 @@
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 function createConfig(type, inPath) {
   const output = {
     filename: "[name].[hash:8].js"
@@ -17,11 +19,16 @@ function createConfig(type, inPath) {
     ]
   };
 
+  const plugins = [
+    new HtmlWebpackPlugin()
+  ];
+
   return {
     output,
     resolve,
     module,
-    devtool: "source-map"
+    devtool: "source-map",
+    plugins
   };
 }
 
