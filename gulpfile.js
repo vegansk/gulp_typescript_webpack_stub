@@ -19,15 +19,15 @@ const tsTask = (debug) => () => {
   return gulp.src(`${srcDir}/**/*.ts`)
     .pipe(sourcemaps.init())
     .pipe(tsProject())
-    .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: `/${srcDir}`}))
+    .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: `../../${srcDir}`}))
     .pipe(gulp.dest(tsOutDir(debug)));
 };
 
 const webpackTask = (debug) => () => {
   return gulp.src(`${tsOutDir(debug)}/**/*.js`)
-    .pipe(sourcemaps.init())
+    .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(gulpWebpack(webpackConfig(debug, tsOutDir(debug)), webpack))
-    .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: `/${srcDir}`}))
+    .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: `../../${srcDir}`}))
     .pipe(gulp.dest(outDir(debug)));
 };
 

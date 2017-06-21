@@ -7,9 +7,21 @@ function createConfig(type, inPath) {
     modules: [inPath, "node_modules"]
   };
 
+  const module = {
+    rules: [
+      {
+        test: /\.js$/,
+        use: ["source-map-loader"],
+        enforce: "pre"
+      }
+    ]
+  };
+
   return {
     output,
-    resolve
+    resolve,
+    module,
+    devtool: "source-map"
   };
 }
 
