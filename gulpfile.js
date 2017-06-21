@@ -3,6 +3,8 @@ const sourcemaps = require("gulp-sourcemaps");
 const ts = require("gulp-typescript");
 const gulpWebpack = require("webpack-stream");
 const webpack = require("webpack");
+const clean = require('gulp-dest-clean');
+
 const webpackConfig = require("./scripts/webpack-config.js");
 
 const tsProject = ts.createProject("tsconfig.json");
@@ -25,6 +27,7 @@ const tsTask = (debug) => () => {
 
 const webpackTask = (debug) => () => {
   return gulp.src(`${tsOutDir(debug)}/**/*.js`)
+    .pipe(clean(outDir(debug)))
     .pipe(sourcemaps.init({ loadMaps: true }))
     .pipe(gulpWebpack(webpackConfig(debug, tsOutDir(debug)), webpack))
     .pipe(sourcemaps.write(".", {includeContent: false, sourceRoot: `../../${srcDir}`}))
