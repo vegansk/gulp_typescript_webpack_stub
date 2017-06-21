@@ -29,6 +29,10 @@ function createConfig(type, inPath) {
     ]
   };
 
+  const entry = [
+    `index.js`
+  ];
+
   const plugins = [
     new HtmlWebpackPlugin(),
     new webpack.DefinePlugin({
@@ -41,6 +45,7 @@ function createConfig(type, inPath) {
   );
 
   return {
+    entry,
     output,
     resolve,
     module,

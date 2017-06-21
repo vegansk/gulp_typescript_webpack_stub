@@ -3,6 +3,7 @@ const sourcemaps = require("gulp-sourcemaps");
 const ts = require("gulp-typescript");
 const webpackStream = require("webpack-stream");
 const webpack = require("webpack");
+const WebpackDevServer = require("webpack-dev-server");
 const watch = require("gulp-watch");
 const sequence = require('gulp-watch-sequence');
 const clean = require("gulp-dest-clean");
@@ -77,10 +78,29 @@ const webpackTask = (debug, { watchMode = false } = {}) => () => {
   return task();
 };
 
+const webpackDevServerTask = (debug) => () => {
+  const devServer = {
+    inline: true,
+    disableHostCheck: true
+  };
+
+  const server = new WebpackDevServer(
+    webpack(webpackConfig(debug, tsOutDir(debug))),
+    devServer
+  );
+  server.listen(8081);
+};
+
 const watchTask = (debug) => () => {
   gulp.start(`res:${debug}:watch`);
   gulp.start(`ts:${debug}:watch`);
   gulp.start(`build:${debug}:watch`);
+};
+
+const startTask = (debug) => () => {
+  gulp.start(`res:${debug}:watch`);
+  gulp.start(`ts:${debug}:watch`);
+  gulp.start(`devServer:${debug}`);
 };
 
 const createTasks = (debug) => {
@@ -93,6 +113,8 @@ const createTasks = (debug) => {
   // The dependency is needed because watch task silently
   // fails when target doesn't exist
   gulp.task(`watch:${debug}`, [`build:${debug}`], watchTask(`${debug}`));
+  gulp.task(`devServer:${debug}`, webpackDevServerTask(`${debug}`));
+  gulp.task(`start:${debug}`, startTask(`${debug}`));
 };
 
 createTasks("debug");

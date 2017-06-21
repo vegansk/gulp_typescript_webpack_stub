@@ -7,4 +7,4 @@ if (process.env.NODE_ENV === "development") {
   console.log("Starting release version...")
 }
 
-console.log(sprintf("Hello, %s", "world!"))
+window.document.write(sprintf("Hello, %s", "world!"))
