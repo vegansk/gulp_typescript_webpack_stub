@@ -14,10 +14,20 @@ const webpackConfig = require("./scripts/webpack-config.js");
 const srcDir = "src";
 const buildDir = "build";
 const distDir = "dist";
+const resources = [`${srcDir}/**/*`, `!${srcDir}/**/*.ts`];
 
 const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug" : "release"}`;
 const tsOutDir = targetDir(buildDir);
 const outDir = targetDir(distDir);
+
+const copyResourcesTask = (debug, { watchMode = false } = {}) => () => {
+  const task = () => gulp.src(resources)
+    .pipe(gulp.dest(tsOutDir(debug)));
+  if(watchMode)
+    return watch(resources, task);
+  else
+    return task();
+};
 
 const tsTask = (debug, { watchMode = false } = {}) => () => {
 
@@ -54,7 +64,7 @@ const tsExecTask = (debug, { watchMode = false } = {}) => (cb) => {
 };
 
 const webpackTask = (debug, { watchMode = false } = {}) => () => {
-  const task = () => gulp.src(`${tsOutDir(debug)}/**/*.js`)
+  const task = () => gulp.src(`${tsOutDir(debug)}/**/*`)
         .pipe(plumber())
         .pipe(clean(outDir(debug)))
         .pipe(webpackStream(
@@ -68,13 +78,16 @@ const webpackTask = (debug, { watchMode = false } = {}) => () => {
 };
 
 const watchTask = (debug) => () => {
+  gulp.start(`res:${debug}:watch`);
   gulp.start(`ts:${debug}:watch`);
   gulp.start(`build:${debug}:watch`);
 };
 
+gulp.task("res:debug", copyResourcesTask("debug"));
+gulp.task("res:debug:watch", copyResourcesTask("debug", { watchMode: true }));
 gulp.task("ts:debug", tsExecTask("debug"));
 gulp.task("ts:debug:watch", tsExecTask("debug", { watchMode: true }));
-gulp.task("build:debug", ["ts:debug"], webpackTask("debug"));
+gulp.task("build:debug", ["res:debug", "ts:debug"], webpackTask("debug"));
 gulp.task("build:debug:watch", webpackTask("debug", { watchMode: true }));
 // The dependency is needed because watch task silently
 // fails when target doesn't exist

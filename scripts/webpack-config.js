@@ -15,6 +15,14 @@ function createConfig(type, inPath) {
         test: /\.js$/,
         use: ["source-map-loader"],
         enforce: "pre"
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"]
+      },
+      {
+        test: /\.map$/,
+        use: ["ignore-loader"]
       }
     ]
   };
