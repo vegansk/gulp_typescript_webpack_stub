@@ -16,6 +16,7 @@
     "sprintf-js": "^1.1.1"
   },
   "devDependencies": {
+    "@types/node": "^8.0.1",
     "@types/sprintf-js": "0.0.27",
     "css-loader": "^0.28.4",
     "gulp": "^3.9.1",
