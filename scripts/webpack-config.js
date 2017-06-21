@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 function createConfig(type, inPath) {
   const output = {
@@ -29,7 +30,11 @@ function createConfig(type, inPath) {
 
   const plugins = [
     new HtmlWebpackPlugin()
-  ];
+  ].concat(
+    type !== "debug"
+      ? [ new UglifyJSPlugin() ]
+      : []
+  );
 
   return {
     output,

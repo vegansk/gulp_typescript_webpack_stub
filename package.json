@@ -5,6 +5,7 @@
   "main": "build/release/index.js",
   "scripts": {
     "debug": "node_modules/.bin/gulp build:debug",
+    "release": "node_modules/.bin/gulp build:release",
     "watch": "node_modules/.bin/gulp watch:debug",
     "start": "node build/debug/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -31,6 +32,7 @@
     "source-map-loader": "^0.2.1",
     "style-loader": "^0.18.2",
     "typescript": "^2.3.4",
+    "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^2.6.1",
     "webpack-stream": "^3.2.0"
   }
