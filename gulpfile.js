@@ -76,4 +76,4 @@ gulp.task("ts:debug", tsExecTask("debug"));
 gulp.task("ts:debug:watch", tsExecTask("debug", { watchMode: true }));
 gulp.task("build:debug", ["ts:debug"], webpackTask("debug"));
 gulp.task("build:debug:watch", webpackTask("debug", { watchMode: true }));
-gulp.task("watch:debug", watchTask("debug"));
+gulp.task("watch:debug", ["build:debug"], watchTask("debug"));
