@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 function createConfig(type, inPath) {
   const output = {
-    filename: "[name].[hash:8].js"
+    filename: type === "debug" ? "[name].js" : "[name].[hash:8].js"
   };
 
   const resolve = {
