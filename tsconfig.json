@@ -6,5 +6,11 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "baseUrl": "./src"
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "build",
+    "dist",
+    "node_modules"
+  ]
 }

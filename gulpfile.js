@@ -7,6 +7,7 @@ const watch = require("gulp-watch");
 const sequence = require('gulp-watch-sequence');
 const clean = require("gulp-dest-clean");
 const plumber = require('gulp-plumber');
+const spawn = require('child_process').spawn;
 
 const webpackConfig = require("./scripts/webpack-config.js");
 
@@ -18,9 +19,9 @@ const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug"
 const tsOutDir = targetDir(buildDir);
 const outDir = targetDir(distDir);
 
-const tsTask = (debug, { watchMode = false } = {}, addOpts = {}) => () => {
+const tsTask = (debug, { watchMode = false } = {}) => () => {
 
-  const tsProject = ts.createProject("tsconfig.json", addOpts);
+  const tsProject = ts.createProject("tsconfig.json");
 
   const task = () => gulp.src(`${srcDir}/**/*.ts`)
     .pipe(plumber())
@@ -39,31 +40,40 @@ const tsTask = (debug, { watchMode = false } = {}, addOpts = {}) => () => {
     task();
 };
 
+const tsExecTask = (debug, { watchMode = false } = {}) => (cb) => {
+  const args = ["--outDir", tsOutDir(debug), "-p", "."].concat(
+    watchMode ? ["--watch"] : []
+  );
+  const tsc = spawn("tsc", args, { stdio: "inherit" });
+  tsc.on("close", (code) => {
+    if(code !== 0)
+      cb(new Error(`tsc exited with the code ${code}`));
+    else
+      cb();
+  });
+};
+
 const webpackTask = (debug, { watchMode = false } = {}) => () => {
   const task = () => gulp.src(`${tsOutDir(debug)}/**/*.js`)
-    .pipe(plumber())
-    .pipe(clean(outDir(debug)))
+        .pipe(plumber())
+        .pipe(clean(outDir(debug)))
         .pipe(webpackStream(
           Object.assign({}, webpackConfig(debug, tsOutDir(debug)), {
             watch: watchMode
           }),
           webpack
         ))
-    .pipe(gulp.dest(outDir(debug)));
+        .pipe(gulp.dest(outDir(debug)));
   return task();
 };
 
 const watchTask = (debug) => () => {
-  var queue = sequence(300);
-  watch(`${srcDir}/**/*.ts`, {
-    name: "TS",
-    emitOnGlob: false
-  }, queue.getHandler(`ts:${debug}`));
+  gulp.start(`ts:${debug}:watch`);
   gulp.start(`build:${debug}:watch`);
 };
 
-gulp.task("ts:debug", tsTask("debug"));
-gulp.task("ts:debug:watch", tsTask("debug", { watchMode: true }));
+gulp.task("ts:debug", tsExecTask("debug"));
+gulp.task("ts:debug:watch", tsExecTask("debug", { watchMode: true }));
 gulp.task("build:debug", ["ts:debug"], webpackTask("debug"));
 gulp.task("build:debug:watch", webpackTask("debug", { watchMode: true }));
 gulp.task("watch:debug", watchTask("debug"));
