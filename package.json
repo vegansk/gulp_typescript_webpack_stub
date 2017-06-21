@@ -1,0 +1,23 @@
+{
+  "name": "hello_ts_webpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/release/index.js",
+  "scripts": {
+    "debug": "node_modules/.bin/gulp build:debug",
+    "start": "node build/debug/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "sprintf-js": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/sprintf-js": "0.0.27",
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-typescript": "^3.1.7",
+    "typescript": "^2.3.4"
+  }
+}
