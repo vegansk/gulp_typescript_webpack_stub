@@ -76,4 +76,6 @@ gulp.task("ts:debug", tsExecTask("debug"));
 gulp.task("ts:debug:watch", tsExecTask("debug", { watchMode: true }));
 gulp.task("build:debug", ["ts:debug"], webpackTask("debug"));
 gulp.task("build:debug:watch", webpackTask("debug", { watchMode: true }));
+// The dependency is needed because watch task silently
+// fails when target doesn't exist
 gulp.task("watch:debug", ["build:debug"], watchTask("debug"));
