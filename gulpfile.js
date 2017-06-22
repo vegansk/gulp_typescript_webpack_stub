@@ -19,6 +19,7 @@ const srcDir = "src";
 const buildDir = "build";
 const distDir = "dist";
 const resources = [`${srcDir}/**/*`, `!${srcDir}/**/*.ts`];
+const devServerStartTimeout = 5000;
 
 const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug" : "release"}`;
 const tsOutDir = targetDir(buildDir);
@@ -60,7 +61,7 @@ const tsTask = (debug, { watchMode = false } = {}) => () => {
 
 const tsExecTask = (debug, { watchMode = false } = {}) => (cb) => {
   const args = ["--outDir", tsOutDir(debug), "-p", "."].concat(
-    watchMode ? ["--watch", "--traceResolution", "--diagnostics"] : []
+    watchMode ? ["--watch"] : []
   );
   const tsc = spawn(scriptName("./node_modules/.bin/tsc"), args, { stdio: "inherit", shell: true });
   tsc.on("close", (code) => {
@@ -152,10 +153,11 @@ const webpackDevServerExecTask = () => () => {
 
 const startTask = (debug) => () => {
   buildBeforeWatch(debug).then(() => {
-    gulp.start(`res:${debug}:watch`);
-    gulp.start(`ts:${debug}:watch`);
-    gutil.log("Starting dev server...");
     gulp.start(`devServer:${debug}`);
+    setTimeout(() => {
+      gulp.start(`res:${debug}:watch`);
+      gulp.start(`ts:${debug}:watch`);
+    }, devServerStartTimeout);
   });
 };
 
@@ -166,8 +168,6 @@ const createTasks = (debug) => {
   gulp.task(`ts:${debug}:watch`, tsExecTask(`${debug}`, { watchMode: true }));
   gulp.task(`build:${debug}`, [`res:${debug}`, `ts:${debug}`], webpackTask(`${debug}`));
   gulp.task(`build:${debug}:watch`, webpackTask(`${debug}`, { watchMode: true }));
-  // The dependency is needed because watch task silently
-  // fails when target doesn't exist
   gulp.task(`watch:${debug}`, watchTask(`${debug}`));
   gulp.task(`devServer:${debug}`, webpackDevServerExecTask(`${debug}`));
   gulp.task(`start:${debug}`, startTask(`${debug}`));

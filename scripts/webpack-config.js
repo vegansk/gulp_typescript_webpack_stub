@@ -2,7 +2,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-function createConfig(type, inPath) {
+function createConfig(type, inPath, devServerPort) {
   const output = {
     filename: type === "debug" ? "[name].js" : "[name].[hash:8].js"
   };
@@ -47,9 +47,13 @@ function createConfig(type, inPath) {
   const devServer = {
     inline: true,
     contentBase: inPath,
-    port: process.env.PORT || 8081,
+    port: devServerPort || process.env.PORT || 8081,
     host: "0.0.0.0",
-    disableHostCheck: true
+    disableHostCheck: true,
+    watchOptions: {
+      aggregateTimeout: 300,
+      poll: 1000
+    }
   };
 
   return {
