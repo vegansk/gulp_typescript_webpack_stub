@@ -57,9 +57,9 @@ const tsTask = (debug, { watchMode = false } = {}) => () => {
 
 const tsExecTask = (debug, { watchMode = false } = {}) => (cb) => {
   const args = ["--outDir", tsOutDir(debug), "-p", "."].concat(
-    watchMode ? ["--watch"] : []
+    watchMode ? ["--watch", "--traceResolution", "--diagnostics"] : []
   );
-  const tsc = spawn("./node_modules/.bin/tsc", args, { stdio: "inherit" });
+  const tsc = spawn("./node_modules/.bin/tsc", args, { stdio: "inherit", shell: true });
   tsc.on("close", (code) => {
     if(code !== 0)
       cb(new Error(`tsc exited with the code ${code}`));
@@ -129,8 +129,7 @@ const webpackDevServerTask = (debug) => () => {
       contentBase: outDir(debug),
       watchOptions: {
         aggregateTimeout: 300,
-        poll: 1000,
-        ignored: `${tsOutDir(debug)}/**/*`
+        poll: 1000
       }
     }
   );
@@ -139,7 +138,7 @@ const webpackDevServerTask = (debug) => () => {
 
 const webpackDevServerExecTask = () => () => {
   const args = ["--config", "./scripts/webpack-dev-server-config.js"];
-  const devServer = spawn("./node_modules/.bin/webpack-dev-server", args, { stdio: "inherit" });
+  const devServer = spawn("./node_modules/.bin/webpack-dev-server", args, { stdio: "inherit", shell: true });
   devServer.on("close", (code) => {
     if(code !== 0)
       cb(new Error(`tsc exited with the code ${code}`));
@@ -168,7 +167,6 @@ const createTasks = (debug) => {
   // fails when target doesn't exist
   gulp.task(`watch:${debug}`, watchTask(`${debug}`));
   gulp.task(`devServer:${debug}`, webpackDevServerExecTask(`${debug}`));
-  // gulp.task(`devServer:${debug}`, webpackDevServerTask(`${debug}`));
   gulp.task(`start:${debug}`, startTask(`${debug}`));
 };
 
