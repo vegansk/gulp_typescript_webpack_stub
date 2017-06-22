@@ -23,7 +23,7 @@ const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug"
 const tsOutDir = targetDir(buildDir);
 const outDir = targetDir(distDir);
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8081;
 
 const copyResourcesTask = (debug, { watchMode = false } = {}) => () => {
   const task = () => gulp.src(resources)
@@ -137,6 +137,17 @@ const webpackDevServerTask = (debug) => () => {
   server.listen(PORT);
 };
 
+const webpackDevServerExecTask = () => () => {
+  const args = ["--config", "./scripts/webpack-dev-server-config.js"];
+  const devServer = spawn("./node_modules/.bin/webpack-dev-server", args, { stdio: "inherit" });
+  devServer.on("close", (code) => {
+    if(code !== 0)
+      cb(new Error(`tsc exited with the code ${code}`));
+    else
+      cb();
+  });
+};
+
 const startTask = (debug) => () => {
   buildBeforeWatch(debug).then(() => {
     gulp.start(`res:${debug}:watch`);
@@ -156,7 +167,8 @@ const createTasks = (debug) => {
   // The dependency is needed because watch task silently
   // fails when target doesn't exist
   gulp.task(`watch:${debug}`, watchTask(`${debug}`));
-  gulp.task(`devServer:${debug}`, webpackDevServerTask(`${debug}`));
+  gulp.task(`devServer:${debug}`, webpackDevServerExecTask(`${debug}`));
+  // gulp.task(`devServer:${debug}`, webpackDevServerTask(`${debug}`));
   gulp.task(`start:${debug}`, startTask(`${debug}`));
 };
 

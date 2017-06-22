@@ -44,13 +44,22 @@ function createConfig(type, inPath) {
       : []
   );
 
+  const devServer = {
+    inline: true,
+    contentBase: inPath,
+    port: process.env.PORT || 8081,
+    host: "0.0.0.0",
+    disableHostCheck: true
+  };
+
   return {
     entry,
     output,
     resolve,
     module,
     devtool: "source-map",
-    plugins
+    plugins,
+    devServer
   };
 }
 
