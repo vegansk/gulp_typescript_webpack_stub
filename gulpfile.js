@@ -23,6 +23,8 @@ const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug"
 const tsOutDir = targetDir(buildDir);
 const outDir = targetDir(distDir);
 
+const PORT = process.env.PORT || 8080;
+
 const copyResourcesTask = (debug, { watchMode = false } = {}) => () => {
   const task = () => gulp.src(resources)
     .pipe(gulp.dest(tsOutDir(debug)));
@@ -57,7 +59,7 @@ const tsExecTask = (debug, { watchMode = false } = {}) => (cb) => {
   const args = ["--outDir", tsOutDir(debug), "-p", "."].concat(
     watchMode ? ["--watch"] : []
   );
-  const tsc = spawn("tsc", args, { stdio: "inherit" });
+  const tsc = spawn("./node_modules/.bin/tsc", args, { stdio: "inherit" });
   tsc.on("close", (code) => {
     if(code !== 0)
       cb(new Error(`tsc exited with the code ${code}`));
@@ -78,19 +80,6 @@ const webpackTask = (debug, { watchMode = false } = {}) => () => {
         ))
         .pipe(gulp.dest(outDir(debug)));
   return task();
-};
-
-const webpackDevServerTask = (debug) => () => {
-  const devServer = {
-    inline: true,
-    disableHostCheck: true
-  };
-
-  const server = new WebpackDevServer(
-    webpack(webpackConfig(debug, tsOutDir(debug))),
-    devServer
-  );
-  server.listen(8081);
 };
 
 function isDirExist(dirName) {
@@ -127,10 +116,32 @@ const watchTask = (debug) => () => {
   });
 };
 
+const webpackDevServerTask = (debug) => () => {
+  const config = webpackConfig(debug, tsOutDir(debug));
+  config.entry.main.unshift(`webpack-dev-server/client?http://localhost:${PORT}/`);
+
+  const server = new WebpackDevServer(
+    webpack(config), {
+      stats: {
+        color: true
+      },
+      publicPath: "/",
+      contentBase: outDir(debug),
+      watchOptions: {
+        aggregateTimeout: 300,
+        poll: 1000,
+        ignored: `${tsOutDir(debug)}/**/*`
+      }
+    }
+  );
+  server.listen(PORT);
+};
+
 const startTask = (debug) => () => {
   buildBeforeWatch(debug).then(() => {
     gulp.start(`res:${debug}:watch`);
     gulp.start(`ts:${debug}:watch`);
+    gutil.log("Starting dev server...");
     gulp.start(`devServer:${debug}`);
   });
 };

@@ -29,9 +29,9 @@ function createConfig(type, inPath) {
     ]
   };
 
-  const entry = [
-    `index.js`
-  ];
+  const entry = {
+    main: [`./${inPath}/index.js`]
+  };
 
   const plugins = [
     new HtmlWebpackPlugin(),
