@@ -11,6 +11,7 @@ const plumber = require("gulp-plumber");
 const spawn = require("child_process").spawn;
 const fs = require("fs");
 const gutil = require("gulp-util");
+const process = require("process");
 
 const webpackConfig = require("./scripts/webpack-config.js");
 
@@ -23,7 +24,9 @@ const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug"
 const tsOutDir = targetDir(buildDir);
 const outDir = targetDir(distDir);
 
-const PORT = process.env.PORT || 8081;
+const scriptName = (name) => process.platform === 'win32' ? `${name}.cmd` : name;
+
+const PORT = parseInt(process.env.PORT || "8081");
 
 const copyResourcesTask = (debug, { watchMode = false } = {}) => () => {
   const task = () => gulp.src(resources)
@@ -59,7 +62,7 @@ const tsExecTask = (debug, { watchMode = false } = {}) => (cb) => {
   const args = ["--outDir", tsOutDir(debug), "-p", "."].concat(
     watchMode ? ["--watch", "--traceResolution", "--diagnostics"] : []
   );
-  const tsc = spawn("./node_modules/.bin/tsc", args, { stdio: "inherit", shell: true });
+  const tsc = spawn(scriptName("./node_modules/.bin/tsc"), args, { stdio: "inherit", shell: true });
   tsc.on("close", (code) => {
     if(code !== 0)
       cb(new Error(`tsc exited with the code ${code}`));
@@ -138,7 +141,7 @@ const webpackDevServerTask = (debug) => () => {
 
 const webpackDevServerExecTask = () => () => {
   const args = ["--config", "./scripts/webpack-dev-server-config.js"];
-  const devServer = spawn("./node_modules/.bin/webpack-dev-server", args, { stdio: "inherit", shell: true });
+  const devServer = spawn(scriptName("./node_modules/.bin/webpack-dev-server"), args, { stdio: "inherit", shell: true });
   devServer.on("close", (code) => {
     if(code !== 0)
       cb(new Error(`tsc exited with the code ${code}`));
