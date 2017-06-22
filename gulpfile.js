@@ -7,8 +7,10 @@ const WebpackDevServer = require("webpack-dev-server");
 const watch = require("gulp-watch");
 const sequence = require('gulp-watch-sequence');
 const clean = require("gulp-dest-clean");
-const plumber = require('gulp-plumber');
-const spawn = require('child_process').spawn;
+const plumber = require("gulp-plumber");
+const spawn = require("child_process").spawn;
+const fs = require("fs");
+const gutil = require("gulp-util");
 
 const webpackConfig = require("./scripts/webpack-config.js");
 
@@ -91,16 +93,46 @@ const webpackDevServerTask = (debug) => () => {
   server.listen(8081);
 };
 
+function isDirExist(dirName) {
+  try {
+    return fs.statSync(dirName).isDirectory();
+  } catch (e) {
+    if(e.code === "ENOENT")
+      return false;
+    throw e;
+  }
+}
+
+function buildBeforeWatch(debug) {
+  return new Promise((resolve, reject) => {
+    if(isDirExist(tsOutDir(debug))) {
+      resolve();
+    } else {
+      gutil.log("Perform intial build...");
+      gulp.start(`build:${debug}`, (err) => {
+        if(err)
+          reject(err);
+        else
+          resolve();
+      });
+    }
+  });
+};
+
 const watchTask = (debug) => () => {
-  gulp.start(`res:${debug}:watch`);
-  gulp.start(`ts:${debug}:watch`);
-  gulp.start(`build:${debug}:watch`);
+  buildBeforeWatch(debug).then(() => {
+    gulp.start(`res:${debug}:watch`);
+    gulp.start(`ts:${debug}:watch`);
+    gulp.start(`build:${debug}:watch`);
+  });
 };
 
 const startTask = (debug) => () => {
-  gulp.start(`res:${debug}:watch`);
-  gulp.start(`ts:${debug}:watch`);
-  gulp.start(`devServer:${debug}`);
+  buildBeforeWatch(debug).then(() => {
+    gulp.start(`res:${debug}:watch`);
+    gulp.start(`ts:${debug}:watch`);
+    gulp.start(`devServer:${debug}`);
+  });
 };
 
 const createTasks = (debug) => {
@@ -112,7 +144,7 @@ const createTasks = (debug) => {
   gulp.task(`build:${debug}:watch`, webpackTask(`${debug}`, { watchMode: true }));
   // The dependency is needed because watch task silently
   // fails when target doesn't exist
-  gulp.task(`watch:${debug}`, [`build:${debug}`], watchTask(`${debug}`));
+  gulp.task(`watch:${debug}`, watchTask(`${debug}`));
   gulp.task(`devServer:${debug}`, webpackDevServerTask(`${debug}`));
   gulp.task(`start:${debug}`, startTask(`${debug}`));
 };
