@@ -12,6 +12,7 @@ const spawn = require("child_process").spawn;
 const fs = require("fs");
 const gutil = require("gulp-util");
 const process = require("process");
+const path = require("path");
 
 const webpackConfig = require("./scripts/webpack-config.js");
 
@@ -25,7 +26,7 @@ const targetDir = (target) => (debug) => `${target}/${debug === "debug"? "debug"
 const tsOutDir = targetDir(buildDir);
 const outDir = targetDir(distDir);
 
-const scriptName = (name) => process.platform === 'win32' ? `${name}.cmd` : name;
+const scriptName = (name) => path.normalize(process.platform === 'win32' ? `${name}.cmd` : name);
 
 const PORT = parseInt(process.env.PORT || "8081");
 

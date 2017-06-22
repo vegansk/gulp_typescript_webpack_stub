@@ -21,7 +21,6 @@
     "css-loader": "^0.28.4",
     "gulp": "^3.9.1",
     "gulp-batch": "^1.0.5",
-    "gulp-clean-dest": "^0.2.0",
     "gulp-dest-clean": "^0.5.0",
     "gulp-plumber": "^1.1.0",
     "gulp-sourcemaps": "^2.6.0",
